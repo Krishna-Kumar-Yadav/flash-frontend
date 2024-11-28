@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import '/src/assets/fonts/font.css';
+
+.grid-70-30 {
+    display: grid;
+    grid-template-columns: 70% 30%;
+}
+
+.grid-15-75-10 {
+    display: grid;
+    grid-template-rows: 15% 75% 10%;
+}
+
+.grid-15-85 {
+    display: grid;
+    grid-template-rows: 15% 85%;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grid-20-73-7-col {
+    display: grid;
+    grid-template-columns: 20% 73% 7%;
+}
+
+.grid-80-20-col {
+    display: grid;
+    grid-template-columns: 80% 20%;
+}
+
+.grid-20-80-col {
+    display: grid;
+    grid-template-columns: 20% 80%;
+}
+
+.grid-10-80-10 {
+    display: grid;
+    grid-template-rows: 10% 80% 10%;
+}
+
+.isDarkMode {
+    background-color: #131313;
+    color: aliceblue;
+
+}
+
+.isLightMode {
+    background-color: rgb(152, 179, 204);
+    color: black;
+
+}
