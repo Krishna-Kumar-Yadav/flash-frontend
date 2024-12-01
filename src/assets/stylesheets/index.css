@@ -46,13 +46,13 @@
 }
 
 .isDarkMode {
-    background-color: #131313;
+    background-color: #00000071;
     color: aliceblue;
 
 }
 
 .isLightMode {
-    background-color: rgb(152, 179, 204);
+    background-color: rgba(160, 179, 196, 0.671);
     color: black;
 
 }

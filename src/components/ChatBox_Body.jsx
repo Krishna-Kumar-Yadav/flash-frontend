@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { useQuery, gql, useLazyQuery } from "@apollo/client";
+import { useQuery, gql, useLazyQuery, useMutation } from "@apollo/client";
 
 import SendMsgBox from "./SendMsgBox";
 import RecieveMsgBox from "./RecieveMsgBox";
 import socket from "../services/Socket.io/socket";
+import { setDeleteChat } from "../redux/slices/deleteChat";
+import { useDispatch } from "react-redux";
+
 
 // GraphQL query to fetch messages
 const GET_ALL_MESSAGES = gql`
@@ -28,10 +31,21 @@ const GET_CHATROOM = gql`
   }
 `;
 
-const ChatBox_Body = () => {
+const DELETE_CHAT = gql`
+    mutation DeleteChat($chatId: String!) {
+        deleteChat(chatId: $chatId) {
+    success
+  }
+}
+`;
+
+const ChatBox_Body = ({ fileMode }) => {
+    const dispatch = useDispatch()
+
     const user = useSelector((state) => state.currentUser.data);
     const recieverId = useSelector((state) => state.recieverUser.recieverId);
     const senderId = user?.id;
+
 
     const [messages, setMessages] = useState([]);
     const chatBoxRef = useRef(null);
@@ -40,6 +54,9 @@ const ChatBox_Body = () => {
     const isDarker = useSelector((state) => state.isDarker);
     const chatType = useSelector((state) => state.chatType);
     const group = useSelector((state) => state.groupUser);
+    const currentFile = useSelector((state) => state.file);
+    const deleteChat = useSelector((state) => state.deleteChat);
+
 
     const groupName = group?.name;
     const groupIds = group?.users.map((user) => user.id) || [];
@@ -58,11 +75,40 @@ const ChatBox_Body = () => {
         fetchPolicy: "network-only",
         onCompleted: (data) => {
             setMessages(data?.getAllMessages || []);
+
         },
         onError: (error) => {
             console.error("Error retrieving messages:", error);
         },
     });
+
+    const [chatDelete] = useMutation(DELETE_CHAT);
+
+    async function handleChatDelete(id) {
+
+        setMessages(messages.filter((chat) => chat.id !== id))
+
+        if (!id) return
+        try {
+            await chatDelete({
+                variables: { chatId: id },
+                onCompleted() {
+                    console.log("chat deleted successfully");
+
+                }
+            })
+        } catch (err) {
+            console.log("error in deletion chat", err);
+
+        }
+
+    }
+
+
+    useEffect(() => {
+        if (deleteChat) setMessages([]);
+        dispatch(setDeleteChat(false));
+    }, [deleteChat])
 
     const [getChatRoom, { data }] = useLazyQuery(GET_CHATROOM);
 
@@ -76,42 +122,54 @@ const ChatBox_Body = () => {
         });
     };
 
+
+
+
     useEffect(() => {
         handleGetChatRoom();
     }, [groupName, recieverId]);
 
     // Real-time message and group notification listeners
+
     useEffect(() => {
         if (!socket) return;
 
-        // Listen for single chat messages
-        socket.on("receiveSingleMessage", (message) => {
-
-
+        const handleSingleMessage = (message) => {
             if (chatType === "single" && message.senderId === recieverId) {
                 setMessages((prevMessages) => [...prevMessages, message]);
             }
-        });
+        };
 
-        // Listen for group chat messages
-        socket.on("receiveGroupMessage", (message) => {
+        const handleGroupMessage = (message) => {
             if (chatType === "group" && message.groupName === data?.getChatRoom.name) {
                 setMessages((prevMessages) => [...prevMessages, message]);
             }
-        });
-
-        // Listen for new group notifications
-        socket.on("joinGroup", (group) => {
-            //alert(`New group created: ${group.groupName}`);
-            console.log("Group added notification received:");
-        });
-
-        return () => {
-            socket.off("receiveSingleMessage");
-            socket.off("receiveGroupMessage");
-            socket.off("joinGroup");
         };
-    }, [socket, data, chatType]);
+
+        const handleJoinGroup = (group) => {
+
+            console.log("Group added notification received:", group);
+        };
+
+        // Attach listeners
+        socket.on("receiveSingleMessage", handleSingleMessage);
+        socket.on("receiveGroupMessage", handleGroupMessage);
+        socket.on("joinGroup", handleJoinGroup);
+
+        // Cleanup listeners on component unmount or when socket changes
+        return () => {
+            socket.off("receiveSingleMessage", handleSingleMessage);
+            socket.off("receiveGroupMessage", handleGroupMessage);
+            socket.off("joinGroup", handleJoinGroup);
+        };
+    }, [socket, data, chatType, recieverId]);
+
+    useEffect(() => {
+        if (currentFile && fileMode) {
+            setMessages((prevMessages) => [...prevMessages, currentFile]);
+        }
+    }, [currentFile])
+
 
     useEffect(() => {
         if (currentMsg) {
@@ -138,13 +196,16 @@ const ChatBox_Body = () => {
             className="chatBox_body overflow-y-scroll overflow-x-hidden h-[27.42rem] p-4 flex flex-col gap-3"
             aria-live="polite"
         >
+
             {messages.map((msg, index) =>
-                (msg.senderId === senderId || typeof msg === "string") ? (
-                    <SendMsgBox key={msg.id || `${index}-${msg.creationTime}`} message={msg} isDarker={isDarker} />
+
+                (msg.senderId === senderId || typeof msg === "string" || ("size" in msg)) ? (
+                    <SendMsgBox key={msg.id || `${index}-${msg.creationTime}`} message={msg} isDarker={isDarker} handleChatDelete={handleChatDelete} />
                 ) : (
-                    <RecieveMsgBox key={msg.id || `${index}-${msg.creationTime}`} message={msg} isDarker={isDarker} />
+                    <RecieveMsgBox key={msg.id || `${index}-${msg.creationTime}`} message={msg} isDarker={isDarker} handleChatDelete={handleChatDelete} />
                 )
             )}
+
         </div>
     );
 };

@@ -12,17 +12,18 @@ const ChatBox = () => {
     const isDarker = useSelector((state) => state.isDarker);
     const chatType = useSelector((state) => state.chatType);
     const [navGroup, setNavGroup] = useState(false)
+    const [fileMode, setFileMode] = useState(false)
 
     function handleNavGroup() {
         setNavGroup((prev) => !prev)
     }
 
     return (
-        <div className={`chatBox  grid-15-75-10 h-full   border-r-4 ${isDarker ? 'bg-slate-700 border-r-black' : 'bg-sky-100 border-r-gray-50'}`}>
+        <div className={`chatBox  grid-15-75-10 h-full    ${isDarker ? 'bg-slate-700 border-r-black' : 'bg-sky-100 border-r-gray-50'}`}>
             <ChatBox_Nav currentUser={user} handleNavGroup={handleNavGroup} />
-            {!navGroup && <ChatBox_Body currentUser={user} />}
+            {!navGroup && <ChatBox_Body currentUser={user} fileMode={fileMode} />}
             {navGroup && <ChatBox_Nav_groupMembers handleNavGroup={handleNavGroup} />}
-            <ChatBox_Tool />
+            <ChatBox_Tool setFileMode={setFileMode} />
 
         </div>
     );

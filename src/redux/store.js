@@ -7,6 +7,8 @@ import groupUserSlice from './slices/groupUser';
 import isDarkerSlice from './slices/isDarker';
 import chatTypeSlice from './slices/chatType';
 import updateGroupSlice from './slices/updateGroup';
+import fileSlice from './slices/currentFile';
+import deleteChatSlice from './slices/deleteChat'
 
 export const store = configureStore({
     reducer: {
@@ -17,7 +19,8 @@ export const store = configureStore({
         addUser: addUserSlice,
         groupUser: groupUserSlice,
         chatType: chatTypeSlice,
-        updateGroup: updateGroupSlice
-
+        updateGroup: updateGroupSlice,
+        file: fileSlice,
+        deleteChat: deleteChatSlice
     }
 });

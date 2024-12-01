@@ -4,6 +4,7 @@ const FileViewer = ({ theFile, handleView, handleSubmit }) => {
     const [file, setFile] = useState(null);
     const [fileContent, setFileContent] = useState(null);
 
+
     useEffect(() => {
         if (theFile) {
             const selectedFile = theFile;
@@ -66,7 +67,7 @@ const FileViewer = ({ theFile, handleView, handleSubmit }) => {
     };
 
     return (
-        <div className="fileViewer fixed top-1/4 left-32 items-center h-1/2 w-1/2 p-3 rounded-lg flex-center gap-2 flex-col">
+        <div className="fileViewer z-40 fixed top-1/4 left-32 items-center h-1/2 w-1/2 p-3 rounded-lg flex-center gap-2 flex-col">
             <div className="fileViewer_content h-full w-full border bg-slate-500 rounded-lg p-2 flex-center">
                 {renderFile()}
             </div>
@@ -83,7 +84,7 @@ const FileViewer = ({ theFile, handleView, handleSubmit }) => {
                     onClick={handleSubmit}
                     className="px-4 bg-blue-700 rounded ml-4 text-white py-2 active:scale-[0.85]"
                 >
-                    Send
+                    Ok
                 </button>
             </div>
         </div>

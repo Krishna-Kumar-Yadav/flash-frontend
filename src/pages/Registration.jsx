@@ -92,6 +92,8 @@ const Registration = () => {
                     name="mobileNumber"
                     value={formdata.mobileNumber}
                     onChange={handleChange}
+                    minLength={10}
+                    maxLength={10}
                     required
                 />
                 <input

@@ -2,6 +2,8 @@ import logo from '../assets/images/logo.png';
 import { useSelector } from 'react-redux';
 import { useState } from 'react';
 import { useMutation, gql } from '@apollo/client';
+import { useDispatch } from 'react-redux';
+import { setDeleteChat } from '../redux/slices/deleteChat';
 
 const DELETE_MSG_OF_CHATROOM = gql`
     mutation DeleteMsgOfChatroom($senderId: String!, $recieverId: String!) {
@@ -20,6 +22,7 @@ const ChatBox_Nav = ({ handleNavGroup }) => {
 
     const groupName = useSelector((state) => state.groupUser?.name);
     const chatType = useSelector((state) => state.chatType);
+    const dispatch = useDispatch()
 
     const [deleteMsgOfChatroom] = useMutation(DELETE_MSG_OF_CHATROOM, {
         onCompleted: () => {
@@ -33,6 +36,7 @@ const ChatBox_Nav = ({ handleNavGroup }) => {
     async function handleDeleteChats() {
         await deleteMsgOfChatroom({ variables: { senderId, recieverId } });
         setMenu(false);
+        dispatch(setDeleteChat(true));
     }
 
     function handleToggleMenu() {
@@ -53,11 +57,11 @@ const ChatBox_Nav = ({ handleNavGroup }) => {
             <div className={`chatbox-nav__name flex items-center font-bold text-3xl ${isDarker ? 'isDarkMode' : 'isLightMode'}`}>
                 {chatType === "group" ? groupName : recieverName}
             </div>
-            <div className="chatbox-nav__menu flex-center relative">
+            <div className={`chatbox-nav__menu flex-center relative ${isDarker ? 'isDarkMode' : 'isLightMode'}`}>
                 {chatType === "group" && (
                     <svg
                         onClick={handleNavGroup}
-                        className="cursor-pointer active:scale-[0.95]"
+                        className="cursor-pointer active:scale-95 h-7"
                         xmlns="http://www.w3.org/2000/svg"
                         height="48px"
                         viewBox="0 -960 960 960"
@@ -69,7 +73,7 @@ const ChatBox_Nav = ({ handleNavGroup }) => {
                 )}
                 {chatType === "single" && (
                     <svg
-                        className="cursor-pointer active:scale-[0.95]"
+                        className="cursor-pointer active:scale-95 h-7 "
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 -960 960 960"
                         width="3rem"
